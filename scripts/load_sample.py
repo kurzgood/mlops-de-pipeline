@@ -3,13 +3,15 @@ import s3_exec
 import boto3
 import os
 
+ODATE=snakemake.config["odate"]
+
 def main():
     os_aws_access_key_id = os.getenv("aws_access_key_id","AKIA4BQN736FKFAWLMOF")
     os_aws_secret_access_key = os.getenv("aws_secret_access_key","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")
     os_s3_region_name = os.getenv("s3_region_name","us-west-2")
     os_bucket_name = os.getenv("access_bucket_snakemake_name", "mlops-pipeline-result")
 
-    file = 'not_exist_pipeline_2022-12-19.txt'
+    file = 'not_exist_pipeline_'+ODATE+'.txt'
 
     bucket_file = "output_folders/" + file
     local_file = file
@@ -66,10 +68,10 @@ def main():
 
     print(result)
 
-    f = open('/dags/mlops-pipeline-result/load_sample.txt','w')
-    f.write(snakemake.output[0] + "\n")
-    f.write(str(result))    
-    f.close()
+    # f = open('/dags/mlops-pipeline-result/load_sample.txt','w')
+    # f.write(snakemake.output[0] + "\n")
+    # f.write(str(result))    
+    # f.close()
 
     f = open(snakemake.output[0],'w')    
     #print("###", os.path.dirname(os.path.abspath(f)))
