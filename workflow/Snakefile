@@ -3,37 +3,48 @@ ODATE=config['odate']
 
 rule all:
     input:
-        expand("{ODATE}/load_lims.txt", ODATE=ODATE),
-        expand("{ODATE}/load_match_1.txt"
+        expand("mlops-pipeline-result/{ODATE}/load_lims.txt", ODATE=ODATE),
+        expand("mlops-pipeline-result/{ODATE}/load_match_1.txt", ODATE=ODATE),
+        expand("mlops-pipeline-result/{ODATE}/load_sample.txt", ODATE=ODATE)
 
 rule load_lims:
-    container: "docker://hub.docker.com/j2lab/minderadatatransfer:VD_Daily_0.2.1"
     input:
-        expand("{ODATE}/export_lims.txt", ODATE=ODATE)
+        expand("mlops-pipeline-result/{ODATE}/export_lims.txt", ODATE=ODATE)
     output:
-        expand("{ODATE}/load_lims.txt", ODATE=ODATE)
-    shell:
-        "/java/datatransfer.sh lims {ODATE}"
+        expand("mlops-pipeline-result/{ODATE}/load_lims.txt", ODATE=ODATE)
+    script:
+        "scripts/load_lims.py {ODATE}"
 
 rule export_lims:
-    container: "docker://hub.docker.com/j2lab/lambda-py:v1.0.14"
     output:
-        expand("{ODATE}/export_lims.txt", ODATE=ODATE)
-    shell:
-        "python3 mlops-de-get-lims.py {ODATE}"
+        expand("mlops-pipeline-result/{ODATE}/export_lims.txt", ODATE=ODATE)
+    script:
+        "scripts/export_lims.py {ODATE}"
 
 rule load_match_1:
-    container: "docker://hub.docker.com/j2lab/minderadatatransfer:VD_Daily_0.2.1"
     input:
-        expand("{ODATE}/sftp_odm.txt", ODATE=ODATE)
+        expand("mlops-pipeline-result/{ODATE}/sftp_odm.txt", ODATE=ODATE)
     output:
-        expand("{ODATE}/load_match_1.txt", ODATE=ODATE)
-    shell:
-        "/java/datatransfer.sh odm {ODATE} odm1.3_fullMATCH_ODM_Export.xml MATCH-1"
+        expand("mlops-pipeline-result/{ODATE}/load_match_1.txt", ODATE=ODATE)
+    script:
+        "scripts/load_match_1.py {ODATE}"
 
 rule sftp_odm:
-    container: "docker://hub.docker.com/j2lab/lambda-py:v1.0.14"
     output:
-        expand("{ODATE}/sftp_odm.txt", ODATE=ODATE)
-    shell:
-        "python3 mlops-de-get-odm.py {ODATE}"
+        expand("mlops-pipeline-result/{ODATE}/sftp_odm.txt", ODATE=ODATE)
+    script:
+        "scripts/sftp_odm.py {ODATE}"
+
+rule load_sample:
+    input:
+        expand("mlops-pipeline-result/{ODATE}/remain_sample.txt", ODATE=ODATE)
+    output:
+        expand("mlops-pipeline-result/{ODATE}/load_sample.txt", ODATE=ODATE)
+    script:
+        "scripts/load_sample.py {ODATE}"
+
+rule export_sample:
+    output:
+        expand("mlops-pipeline-result/{ODATE}/remain_sample.txt", ODATE=ODATE)
+    script:
+        "scripts/remain_sample.py {ODATE}"
